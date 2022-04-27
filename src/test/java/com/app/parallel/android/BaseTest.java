@@ -1,14 +1,15 @@
 package com.app.parallel.android;
 
 import com.app.DeviceDetails;
+import com.util.AppUtils;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
-import io.restassured.authentication.PreemptiveBasicAuthScheme;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -16,12 +17,14 @@ import org.testng.annotations.BeforeSuite;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.get;
 import static java.util.stream.Collectors.toList;
+import static org.testng.Assert.assertTrue;
 
 public class BaseTest {
 
@@ -38,28 +41,7 @@ public class BaseTest {
 
     @BeforeSuite(alwaysRun = true)
     public void setupApp() {
-        PreemptiveBasicAuthScheme authenticationScheme = new PreemptiveBasicAuthScheme();
-        authenticationScheme.setUserName(USERNAME);
-        authenticationScheme.setPassword(ACCESS_KEY);
-        requestSpecification = new RequestSpecBuilder()
-                .setBaseUri("https://api-cloud.browserstack.com")
-                .setBasePath("app-automate")
-                .setAuth(authenticationScheme)
-                .build();
-        responseSpecification = new ResponseSpecBuilder()
-                .expectStatusCode(200)
-                .build();
-        List<String> customIds = get("recent_apps").jsonPath().getList("custom_id");
-        if (customIds == null || !customIds.contains("AndroidDemoApp")) {
-            System.out.println("Uploading app...");
-            given()
-                    .header("Content-Type", "multipart/form-data")
-                    .multiPart("url", "https://www.browserstack.com/app-automate/sample-apps/android/WikipediaSample.apk", "text")
-                    .param("custom_id", "AndroidDemoApp")
-                    .post("upload");
-        } else {
-            System.out.println("Using previously uploaded app...");
-        }
+        AppUtils.uploadApp("AndroidDemoApp", "android/WikipediaSample.apk");
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -93,6 +75,21 @@ public class BaseTest {
         js.executeScript("browserstack_executor: {\"action\": \"setSessionStatus\", \"arguments\": {\"status\": \"passed\"}}");
         driverThread.get().quit();
         driverThread.remove();
+    }
+
+    protected void searchWikipedia() {
+        MobileDriver<MobileElement> driver = getMobileDriver();
+        Wait<MobileDriver<MobileElement>> wait = new FluentWait<>(driver)
+                .withTimeout(Duration.ofSeconds(10))
+                .ignoring(NotFoundException.class);
+        driver.findElementByAccessibilityId("Search Wikipedia").click();
+        MobileElement insertTextElement = wait.until(d -> d.findElementById("org.wikipedia.alpha:id/search_src_text"));
+        insertTextElement.click();
+        insertTextElement.sendKeys("BrowserStack");
+        wait.until(d -> d.findElementByClassName("android.widget.ListView").isDisplayed());
+        List<String> companyNames = driver.findElementsByClassName("android.widget.TextView")
+                .stream().map(MobileElement::getText).collect(toList());
+        assertTrue(companyNames.contains("BrowserStack"), "Company is not present in the list");
     }
 
 }

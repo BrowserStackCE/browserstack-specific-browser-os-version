@@ -1,13 +1,12 @@
 package com.app.parallel.ios;
 
 import com.app.DeviceDetails;
+import com.util.AppUtils;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.ios.IOSDriver;
-import io.restassured.authentication.PreemptiveBasicAuthScheme;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -20,8 +19,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static io.restassured.RestAssured.*;
+import static io.restassured.RestAssured.get;
 import static java.util.stream.Collectors.toList;
+import static org.testng.Assert.assertEquals;
 
 public class BaseTest {
 
@@ -38,28 +38,7 @@ public class BaseTest {
 
     @BeforeSuite(alwaysRun = true)
     public void setupApp() {
-        PreemptiveBasicAuthScheme authenticationScheme = new PreemptiveBasicAuthScheme();
-        authenticationScheme.setUserName(USERNAME);
-        authenticationScheme.setPassword(ACCESS_KEY);
-        requestSpecification = new RequestSpecBuilder()
-                .setBaseUri("https://api-cloud.browserstack.com")
-                .setBasePath("app-automate")
-                .setAuth(authenticationScheme)
-                .build();
-        responseSpecification = new ResponseSpecBuilder()
-                .expectStatusCode(200)
-                .build();
-        List<String> customIds = get("recent_apps").jsonPath().getList("custom_id");
-        if (customIds == null || !customIds.contains("iOSDemoApp")) {
-            System.out.println("Uploading app...");
-            given()
-                    .header("Content-Type", "multipart/form-data")
-                    .multiPart("url", "https://www.browserstack.com/app-automate/sample-apps/ios/BStackSampleApp.ipa", "text")
-                    .param("custom_id", "iOSDemoApp")
-                    .post("upload");
-        } else {
-            System.out.println("Using previously uploaded app...");
-        }
+        AppUtils.uploadApp("iOSDemoApp", "ios/BStackSampleApp.ipa");
     }
 
     @BeforeMethod(alwaysRun = true)
@@ -93,6 +72,15 @@ public class BaseTest {
         js.executeScript("browserstack_executor: {\"action\": \"setSessionStatus\", \"arguments\": {\"status\": \"passed\"}}");
         driverThread.get().quit();
         driverThread.remove();
+    }
+
+    protected void printText() {
+        MobileDriver<MobileElement> driver = getMobileDriver();
+        driver.findElementByAccessibilityId("Text Button").click();
+        driver.findElementByAccessibilityId("Text Input").click();
+        driver.findElementByAccessibilityId("Text Input").sendKeys("Welcome to BrowserStack" + Keys.ENTER);
+        assertEquals(driver.findElementByAccessibilityId("Text Output").getText(),
+                "Welcome to BrowserStack", "Incorrect text");
     }
 
 }
