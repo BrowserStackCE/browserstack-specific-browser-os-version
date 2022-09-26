@@ -43,25 +43,26 @@ public class BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setupDriver(Method m) throws MalformedURLException {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("project", "BrowserStack Random Devices");
-        caps.setCapability("build", "Random iOS Devices - " + TIMESTAMP);
-        caps.setCapability("browserstack.user", USERNAME);
-        caps.setCapability("browserstack.key", ACCESS_KEY);
-        List<DeviceDetails> iosDevices = get("devices.json")
+        List<DeviceDetails> mobileDevices = get("devices.json")
                 .jsonPath()
-                .getList("", DeviceDetails.class)
-                .stream()
+                .getList("", DeviceDetails.class);
+        List<DeviceDetails> iosDevices = mobileDevices.stream()
                 .filter(device -> device.getOs().equals("ios"))
+                .filter(device -> !device.getOs_version().contains("Beta"))
+                .filter(device -> Integer.parseInt(device.getOs_version()) > 14)
                 .collect(toList());
         int randomNumber = ThreadLocalRandom.current().nextInt(0, iosDevices.size());
         DeviceDetails deviceDetails = iosDevices.get(randomNumber);
-        System.out.println(deviceDetails);
+        DesiredCapabilities caps = new DesiredCapabilities();
+        caps.setCapability("project", "BrowserStack Random Devices");
+        caps.setCapability("build", "Random iOS Devices - " + TIMESTAMP);
         caps.setCapability("name", m.getName() + " - " + deviceDetails.getDevice());
         caps.setCapability("os", deviceDetails.getOs());
         caps.setCapability("os_version", deviceDetails.getOs_version());
         caps.setCapability("device", deviceDetails.getDevice());
         caps.setCapability("app", "iOSDemoApp");
+        caps.setCapability("browserstack.user", USERNAME);
+        caps.setCapability("browserstack.key", ACCESS_KEY);
 
         driverThread.set(new IOSDriver<>(new URL(URL), caps));
     }

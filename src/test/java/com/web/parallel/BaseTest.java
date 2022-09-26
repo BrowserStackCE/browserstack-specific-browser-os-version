@@ -70,12 +70,15 @@ public class BaseTest {
             case "desktop":
                 List<BrowserDetails> desktopBrowsers = browsers.parallelStream()
                         .filter(browser -> browser.getDevice() == null)
+                        .filter(browser -> browser.getBrowser().equals("chrome"))
+                        .filter(browser -> !browser.getBrowser_version().contains("beta"))
+                        .filter(browser -> Double.parseDouble(browser.getBrowser_version()) > 103.0)
                         .collect(toList());
                 randomNumber = ThreadLocalRandom.current().nextInt(0, desktopBrowsers.size());
                 browserDetails = desktopBrowsers.get(randomNumber);
                 System.out.println(browserDetails);
                 caps.setCapability("build", "Random Desktop Browsers - " + TIMESTAMP);
-                caps.setCapability("name", m.getName() + " - " + browserDetails.getBrowser() + " " + browserDetails.getBrowser_version());
+                caps.setCapability("name", m.getName());
                 caps.setCapability("os", browserDetails.getOs());
                 caps.setCapability("os_version", browserDetails.getOs_version());
                 caps.setCapability("browser", browserDetails.getBrowser());
@@ -84,12 +87,15 @@ public class BaseTest {
             case "mobile":
                 List<BrowserDetails> mobileBrowsers = browsers.parallelStream()
                         .filter(BrowserDetails::isReal_mobile)
+                        .filter(browser -> browser.getOs().equals("ios"))
+                        .filter(browser -> !browser.getOs_version().contains("Beta"))
+                        .filter(browser -> Double.parseDouble(browser.getOs_version()) > 15.0)
                         .collect(toList());
                 randomNumber = ThreadLocalRandom.current().nextInt(0, mobileBrowsers.size());
                 browserDetails = mobileBrowsers.get(randomNumber);
                 System.out.println(browserDetails);
                 caps.setCapability("build", "Random Mobile Browsers - " + TIMESTAMP);
-                caps.setCapability("name", m.getName() + " - " + browserDetails.getDevice());
+                caps.setCapability("name", m.getName());
                 caps.setCapability("os_version", browserDetails.getOs_version());
                 caps.setCapability("device", browserDetails.getDevice());
                 caps.setCapability("browser", browserDetails.getBrowser());

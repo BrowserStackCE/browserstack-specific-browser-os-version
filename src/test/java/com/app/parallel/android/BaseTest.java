@@ -46,25 +46,25 @@ public class BaseTest {
 
     @BeforeMethod(alwaysRun = true)
     public void setupDriver(Method m) throws MalformedURLException {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("project", "BrowserStack Random Devices");
-        caps.setCapability("build", "Random Android Devices - " + TIMESTAMP);
-        caps.setCapability("browserstack.user", USERNAME);
-        caps.setCapability("browserstack.key", ACCESS_KEY);
-        List<DeviceDetails> androidDevices = get("devices.json")
+        List<DeviceDetails> mobileDevices = get("devices.json")
                 .jsonPath()
-                .getList("", DeviceDetails.class)
-                .stream()
+                .getList("", DeviceDetails.class);
+        List<DeviceDetails> androidDevices = mobileDevices.stream()
                 .filter(device -> device.getOs().equals("android"))
+                .filter(device -> Double.parseDouble(device.getOs_version()) > 11.0)
                 .collect(toList());
         int randomNumber = ThreadLocalRandom.current().nextInt(0, androidDevices.size());
         DeviceDetails deviceDetails = androidDevices.get(randomNumber);
-        System.out.println(deviceDetails);
+        DesiredCapabilities caps = new DesiredCapabilities();
+        caps.setCapability("project", "BrowserStack Random Devices");
+        caps.setCapability("build", "Random Android Devices - " + TIMESTAMP);
         caps.setCapability("name", m.getName() + " - " + deviceDetails.getDevice());
         caps.setCapability("os", deviceDetails.getOs());
         caps.setCapability("os_version", deviceDetails.getOs_version());
         caps.setCapability("device", deviceDetails.getDevice());
         caps.setCapability("app", "AndroidDemoApp");
+        caps.setCapability("browserstack.user", USERNAME);
+        caps.setCapability("browserstack.key", ACCESS_KEY);
 
         driverThread.set(new AndroidDriver<>(new URL(URL), caps));
     }
