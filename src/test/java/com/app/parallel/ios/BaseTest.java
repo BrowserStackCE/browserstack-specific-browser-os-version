@@ -2,12 +2,13 @@ package com.app.parallel.ios;
 
 import com.app.DeviceDetails;
 import com.util.AppUtils;
+import com.util.SessionStatus;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.ios.IOSDriver;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -49,14 +50,14 @@ public class BaseTest {
         List<DeviceDetails> iosDevices = mobileDevices.stream()
                 .filter(device -> device.getOs().equals("ios"))
                 .filter(device -> !device.getOs_version().contains("Beta"))
-                .filter(device -> Integer.parseInt(device.getOs_version()) > 14)
+                .filter(device -> Integer.parseInt(device.getOs_version()) >= 14)
                 .collect(toList());
         int randomNumber = ThreadLocalRandom.current().nextInt(0, iosDevices.size());
         DeviceDetails deviceDetails = iosDevices.get(randomNumber);
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("project", "BrowserStack Random Devices");
         caps.setCapability("build", "Random iOS Devices - " + TIMESTAMP);
-        caps.setCapability("name", m.getName() + " - " + deviceDetails.getDevice());
+        caps.setCapability("name", m.getName());
         caps.setCapability("os", deviceDetails.getOs());
         caps.setCapability("os_version", deviceDetails.getOs_version());
         caps.setCapability("device", deviceDetails.getDevice());
@@ -68,9 +69,8 @@ public class BaseTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        JavascriptExecutor js = (JavascriptExecutor) driverThread.get();
-        js.executeScript("browserstack_executor: {\"action\": \"setSessionStatus\", \"arguments\": {\"status\": \"passed\"}}");
+    public void teardown(ITestResult tr) {
+        SessionStatus.markTestSessionStatus(driverThread.get(), tr);
         driverThread.get().quit();
         driverThread.remove();
     }

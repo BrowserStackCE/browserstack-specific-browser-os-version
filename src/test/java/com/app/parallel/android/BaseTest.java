@@ -2,14 +2,15 @@ package com.app.parallel.android;
 
 import com.app.DeviceDetails;
 import com.util.AppUtils;
+import com.util.SessionStatus;
 import io.appium.java_client.MobileDriver;
 import io.appium.java_client.MobileElement;
 import io.appium.java_client.android.AndroidDriver;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
@@ -51,14 +52,14 @@ public class BaseTest {
                 .getList("", DeviceDetails.class);
         List<DeviceDetails> androidDevices = mobileDevices.stream()
                 .filter(device -> device.getOs().equals("android"))
-                .filter(device -> Double.parseDouble(device.getOs_version()) > 11.0)
+                .filter(device -> Double.parseDouble(device.getOs_version()) >= 11.0)
                 .collect(toList());
         int randomNumber = ThreadLocalRandom.current().nextInt(0, androidDevices.size());
         DeviceDetails deviceDetails = androidDevices.get(randomNumber);
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setCapability("project", "BrowserStack Random Devices");
         caps.setCapability("build", "Random Android Devices - " + TIMESTAMP);
-        caps.setCapability("name", m.getName() + " - " + deviceDetails.getDevice());
+        caps.setCapability("name", m.getName());
         caps.setCapability("os", deviceDetails.getOs());
         caps.setCapability("os_version", deviceDetails.getOs_version());
         caps.setCapability("device", deviceDetails.getDevice());
@@ -70,9 +71,8 @@ public class BaseTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        JavascriptExecutor js = (JavascriptExecutor) driverThread.get();
-        js.executeScript("browserstack_executor: {\"action\": \"setSessionStatus\", \"arguments\": {\"status\": \"passed\"}}");
+    public void teardown(ITestResult tr) {
+        SessionStatus.markTestSessionStatus(driverThread.get(), tr);
         driverThread.get().quit();
         driverThread.remove();
     }

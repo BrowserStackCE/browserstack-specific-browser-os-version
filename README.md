@@ -1,6 +1,6 @@
 # BrowserStack Parallel Execution on Specific Browser/OS version <a href="https://www.browserstack.com/"><img src="https://www.vectorlogo.zone/logos/browserstack/browserstack-icon.svg" alt="BrowserStack" height="30"/></a> <a href="https://java.com"><img src="https://www.vectorlogo.zone/logos/java/java-icon.svg" alt="Java" height="30" /></a> <a href="https://www.selenium.dev/"><img src="https://seeklogo.com/images/S/selenium-logo-DB9103D7CF-seeklogo.com.png" alt="Selenium" height="30" /></a>
 
-Test execution on a specific browser/os version on BrowserStack.
+Test execution on specific browser/os version on BrowserStack.
 
 ## Using Maven
 
@@ -21,7 +21,7 @@ Test execution on a specific browser/os version on BrowserStack.
   ```
   mvn -P desktop-browsers test
   ```
-- Run parallel tests on mobile browsers with iOS version 15.0 and above.
+- Run parallel tests on mobile browsers with iOS version 14 and above.
   ```
   mvn -P mobile-browsers test
   ```
@@ -39,7 +39,7 @@ Test execution on a specific browser/os version on BrowserStack.
   ```
   mvn -P android-devices test
   ```
-- Run parallel tests on random iOS devices with iOS version 11.0 andd above.
+- Run parallel tests on random iOS devices with iOS version 14 and above.
   ```
   mvn -P ios-devices test
   ```
@@ -70,7 +70,7 @@ Test execution on a specific browser/os version on BrowserStack.
   ```
   ./gradlew desktop-browsers
   ```
-- Run parallel tests on mobile browsers with iOS version 15.0 and above.
+- Run parallel tests on mobile browsers with iOS version 14 and above.
   ```
   ./gradlew mobile-browsers
   ```
@@ -88,7 +88,7 @@ Test execution on a specific browser/os version on BrowserStack.
   ```
   ./gradlew android-devices
   ```
-- Run parallel tests on random iOS devices with iOS version 11.0 andd above.
+- Run parallel tests on random iOS devices with iOS version 14 and above.
   ```
   ./gradlew ios-devices
   ```

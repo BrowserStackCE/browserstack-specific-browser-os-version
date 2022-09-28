@@ -1,16 +1,17 @@
 package com.web.parallel;
 
+import com.util.SessionStatus;
 import com.web.BrowserDetails;
 import io.restassured.authentication.PreemptiveBasicAuthScheme;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 import java.lang.reflect.Method;
@@ -72,11 +73,10 @@ public class BaseTest {
                         .filter(browser -> browser.getDevice() == null)
                         .filter(browser -> browser.getBrowser().equals("chrome"))
                         .filter(browser -> !browser.getBrowser_version().contains("beta"))
-                        .filter(browser -> Double.parseDouble(browser.getBrowser_version()) > 103.0)
+                        .filter(browser -> Double.parseDouble(browser.getBrowser_version()) >= 103.0)
                         .collect(toList());
                 randomNumber = ThreadLocalRandom.current().nextInt(0, desktopBrowsers.size());
                 browserDetails = desktopBrowsers.get(randomNumber);
-                System.out.println(browserDetails);
                 caps.setCapability("build", "Random Desktop Browsers - " + TIMESTAMP);
                 caps.setCapability("name", m.getName());
                 caps.setCapability("os", browserDetails.getOs());
@@ -89,11 +89,10 @@ public class BaseTest {
                         .filter(BrowserDetails::isReal_mobile)
                         .filter(browser -> browser.getOs().equals("ios"))
                         .filter(browser -> !browser.getOs_version().contains("Beta"))
-                        .filter(browser -> Double.parseDouble(browser.getOs_version()) > 15.0)
+                        .filter(browser -> Integer.parseInt(browser.getOs_version()) >= 14)
                         .collect(toList());
                 randomNumber = ThreadLocalRandom.current().nextInt(0, mobileBrowsers.size());
                 browserDetails = mobileBrowsers.get(randomNumber);
-                System.out.println(browserDetails);
                 caps.setCapability("build", "Random Mobile Browsers - " + TIMESTAMP);
                 caps.setCapability("name", m.getName());
                 caps.setCapability("os_version", browserDetails.getOs_version());
@@ -108,9 +107,8 @@ public class BaseTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void teardown() {
-        JavascriptExecutor js = (JavascriptExecutor) driverThread.get();
-        js.executeScript("browserstack_executor: {\"action\": \"setSessionStatus\", \"arguments\": {\"status\": \"passed\"}}");
+    public void teardown(ITestResult tr) {
+        SessionStatus.markTestSessionStatus(driverThread.get(), tr);
         driverThread.get().quit();
         driverThread.remove();
     }
