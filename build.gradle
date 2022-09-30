@@ -1,6 +1,6 @@
-group = 'com.browserstack'
+group = 'org.browserstack'
 version = '1.0'
-description = 'browserstack-randombrowserdevice'
+description = 'browserstack-specific-browser-os-version'
 
 apply plugin: 'java'
 
