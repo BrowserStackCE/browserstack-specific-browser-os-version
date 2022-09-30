@@ -33,7 +33,7 @@ public class BaseTest {
 
     private static final String USERNAME = System.getenv("BROWSERSTACK_USERNAME");
     private static final String ACCESS_KEY = System.getenv("BROWSERSTACK_ACCESS_KEY");
-    private static final String URL = "http://hub-cloud.browserstack.com/wd/hub";
+    private static final String URL = "https://hub-cloud.browserstack.com/wd/hub";
     private static final LocalDateTime TIMESTAMP = LocalDateTime.now();
 
     public static MobileDriver<MobileElement> getMobileDriver() {
@@ -71,7 +71,7 @@ public class BaseTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void teardown(ITestResult tr) {
+    public void teardownDriver(ITestResult tr) {
         SessionStatus.markTestSessionStatus(driverThread.get(), tr);
         driverThread.get().quit();
         driverThread.remove();

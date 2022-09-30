@@ -41,7 +41,7 @@ public class DeviceDetails {
 
     @Override
     public String toString() {
-        return "Devices{" +
+        return "DeviceDetails{" +
                 "os='" + os + '\'' +
                 ", os_version='" + os_version + '\'' +
                 ", device='" + device + '\'' +
