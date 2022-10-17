@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Random IOS Device Suite">
+    <test name="Random IOS Device Test">
+        <packages>
+            <package name="com.app.parallel.ios"/>
+        </packages>
+    </test>
+</suite>

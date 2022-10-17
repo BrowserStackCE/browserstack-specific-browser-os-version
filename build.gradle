@@ -1,0 +1,82 @@
+group = 'org.browserstack'
+version = '1.0'
+description = 'browserstack-specific-browser-os-version'
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    test.java.srcDirs = ['src/test/java']
+    test.resources.srcDirs = ['src/test/resources']
+}
+
+dependencies {
+    implementation 'io.appium:java-client:7.5.1'
+    implementation 'org.testng:testng:7.4.0'
+    implementation 'com.browserstack:browserstack-local-java:1.0.3'
+    implementation 'io.rest-assured:rest-assured:4.3.3'
+}
+
+tasks.register('desktop-browsers', Test) {
+    useTestNG() {
+        suites 'src/test/resources/suites/web/parallel.testng.xml'
+        setParallel project.property('parallel')
+        setThreadCount Integer.parseInt(project.property('threads').toString())
+    }
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('mobile-browsers', Test) {
+    useTestNG() {
+        suites 'src/test/resources/suites/web/parallel.testng.xml'
+        systemProperty 'environment', 'mobile'
+        setParallel project.property('parallel')
+        setThreadCount Integer.parseInt(project.property('threads').toString())
+    }
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('android-devices', Test) {
+    useTestNG() {
+        suites 'src/test/resources/suites/app/android.parallel.testng.xml'
+        setParallel project.property('parallel')
+        setThreadCount Integer.parseInt(project.property('threads').toString())
+    }
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('ios-devices', Test) {
+    useTestNG() {
+        suites 'src/test/resources/suites/app/ios.parallel.testng.xml'
+        setParallel project.property('parallel')
+        setThreadCount Integer.parseInt(project.property('threads').toString())
+    }
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('available-browsers', Test) {
+    useTestNG()
+    include '**/BrowsersTest.class'
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED", "STANDARD_OUT"
+    }
+}
+
+tasks.register('available-devices', Test) {
+    useTestNG()
+    include '**/DevicesTest.class'
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED", "STANDARD_OUT"
+    }
+}
